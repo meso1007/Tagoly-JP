@@ -6,14 +6,13 @@ import (
 	"github.com/AlecAivazis/survey/v2"
 )
 
-// コミットタイプの構造体
 type CommitType struct {
 	Key   string
 	Label string
 }
 
-// 選択肢リスト
-var CommitTypes = []CommitType{
+// 標準タグ
+var defaultCommitTypes = []CommitType{
 	{"feat", "New feature"},
 	{"fix", "Bug fix"},
 	{"docs", "Documentation"},
@@ -22,30 +21,39 @@ var CommitTypes = []CommitType{
 	{"chore", "Maintenance"},
 }
 
-// コミットタイプを選択
-func SelectCommitType() string {
+// カスタムタグ対応
+func SelectCommitType(customTags []string) string {
 	options := []string{}
-	for _, c := range CommitTypes {
+
+	for _, c := range defaultCommitTypes {
 		options = append(options, fmt.Sprintf("%s (%s)", c.Key, c.Label))
+	}
+	for _, ct := range customTags {
+		options = append(options, fmt.Sprintf("%s (Custom)", ct))
 	}
 
 	var selected string
 	prompt := &survey.Select{
-		Message: "🔧 Select commit type:",
-		Options: options,
+		Message:  "🔧 Select commit type:",
+		Options:  options,
+		PageSize: 10,
 	}
 	survey.AskOne(prompt, &selected)
 
-	// "feat (New feature)" → "feat" 部分だけ抽出
-	for _, c := range CommitTypes {
+	for _, c := range defaultCommitTypes {
 		if selected == fmt.Sprintf("%s (%s)", c.Key, c.Label) {
 			return c.Key
 		}
 	}
+	for _, ct := range customTags {
+		if selected == fmt.Sprintf("%s (Custom)", ct) {
+			return ct
+		}
+	}
+
 	return "feat"
 }
 
-// メッセージ入力
 func InputCommitMessage() string {
 	var message string
 	prompt := &survey.Input{
@@ -55,7 +63,6 @@ func InputCommitMessage() string {
 	return message
 }
 
-// 確認
 func ConfirmCommit(final string) bool {
 	var confirm bool
 	prompt := &survey.Confirm{

@@ -1,4 +1,4 @@
-module gcommit
+module tagoly
 
 go 1.24.5
 
