@@ -14,8 +14,8 @@ func LoadConfig() (*Config, error) {
 	cfg := &Config{}
 
 	// プロジェクト直下
-	if _, err := os.Stat(".tagolyrc"); err == nil {
-		data, _ := os.ReadFile(".tagolyrc")
+	if _, err := os.Stat(".tagolycustom"); err == nil {
+		data, _ := os.ReadFile(".tagolycustom")
 		json.Unmarshal(data, cfg)
 		return cfg, nil
 	}
@@ -25,7 +25,7 @@ func LoadConfig() (*Config, error) {
 	if err != nil {
 		return cfg, err
 	}
-	file := filepath.Join(home, ".tagolyrc")
+	file := filepath.Join(home, ".tagolycustom")
 	if _, err := os.Stat(file); os.IsNotExist(err) {
 		return cfg, nil
 	}
