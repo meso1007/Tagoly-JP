@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"os/exec"
+	"strings"
 )
 
 // ステージされているファイルがあるか確認
@@ -28,4 +29,13 @@ func Commit(message string) error {
 		return fmt.Errorf("failed to commit: %v", err)
 	}
 	return nil
+}
+func GetChangedFiles() ([]string, error) {
+	cmd := exec.Command("git", "diff", "--name-only", "--cached")
+	out, err := cmd.Output()
+	if err != nil {
+		return nil, err
+	}
+	files := strings.Split(strings.TrimSpace(string(out)), "\n")
+	return files, nil
 }

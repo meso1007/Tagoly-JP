@@ -1,29 +1,19 @@
+// cmd/gcommit/main.go
 package main
 
 import (
 	"fmt"
+	"gcommit/internal/generator"
 	"gcommit/internal/git"
-	"gcommit/internal/prompt"
+	"log"
 )
 
 func main() {
-	if !git.HasStagedChanges() {
-		fmt.Println("⚠️  No staged changes found. Use 'git add' first.")
-		return
+	files, err := git.GetChangedFiles()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	commitType := prompt.SelectCommitType()
-	message := prompt.InputCommitMessage()
-	final := fmt.Sprintf("%s: %s", commitType, message)
-
-	if prompt.ConfirmCommit(final) {
-		err := git.Commit(final)
-		if err != nil {
-			fmt.Println("❌ Commit failed:", err)
-			return
-		}
-		fmt.Println("✅ Commit done!")
-	} else {
-		fmt.Println("❌ Commit cancelled.")
-	}
+	scope, scopeList := generator.DetectScopeWithList(files)
+	fmt.Printf("Detected scope: %s\n", scope, scopeList)
 }
