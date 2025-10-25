@@ -1,11 +1,20 @@
-// internal/generator/scope.go
 package generator
 
-import "strings"
+import (
+	"sort"
+	"strings"
+)
 
-// DetectScopeWithList は複数スコープのリストも返す
-func DetectScopeWithList(files []string) (string, []string) {
+// DetectScopeWithListImproved は最も多いスコープを自動選択、複数なら選択肢も作る
+func DetectScopeWithListImproved(files []string) (string, []string) {
 	counts := map[string]int{}
+	fullScopes := map[string]bool{}
+
+	excludeScopes := map[string]bool{
+		"tagoly": true,
+		"":       true,
+	}
+
 	for _, f := range files {
 		parts := strings.Split(f, "/")
 		var scope string
@@ -13,26 +22,45 @@ func DetectScopeWithList(files []string) (string, []string) {
 			scope = "root"
 		} else {
 			switch parts[0] {
-			case "internal":
-				scope = parts[1]
-			case "cmd":
-				scope = parts[1]
+			case "internal", "cmd":
+				scope = parts[0] + "/" + parts[1]
 			default:
 				scope = parts[0]
 			}
 		}
-		counts[scope]++
+		if !excludeScopes[scope] {
+			counts[scope]++
+			fullScopes[scope] = true
+		}
 	}
 
-	// スコープを配列に
+	// スコープ一覧
 	scopes := []string{}
-	for s := range counts {
+	for s := range fullScopes {
 		scopes = append(scopes, s)
 	}
 
-	// 単一スコープならそのまま、複数なら "multiple" とスコープ一覧
-	if len(scopes) == 1 {
-		return scopes[0], scopes
+	// 複数スコープなら最後に "multiple"
+	if len(scopes) > 1 {
+		scopes = append(scopes, "multiple")
 	}
-	return "multiple", scopes
+
+	// 最多出現スコープをデフォルトに設定
+	var defaultScope string
+	if len(counts) > 0 {
+		type kv struct {
+			Key   string
+			Value int
+		}
+		var ss []kv
+		for k, v := range counts {
+			ss = append(ss, kv{k, v})
+		}
+		sort.Slice(ss, func(i, j int) bool { return ss[i].Value > ss[j].Value })
+		defaultScope = ss[0].Key
+	} else {
+		defaultScope = "root"
+	}
+
+	return defaultScope, scopes
 }

@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	// 1. 設定ファイル読み込み (.tagolyrc)
+	// 1. 設定読み込み
 	cfg, err := config.LoadConfig()
 	if err != nil {
 		log.Fatal(err)
@@ -27,25 +27,26 @@ func main() {
 	}
 
 	// 3. スコープ検出
-	scope, scopeList := generator.DetectScopeWithList(files)
-	if scope == "multiple" {
+	scope, scopeList := generator.DetectScopeWithListImproved(files)
+	if len(scopeList) > 1 {
 		fmt.Println("Multiple scopes detected:", scopeList)
-		// 複数の場合は選択させる
 		promptScope := &survey.Select{
 			Message:  "Select scope:",
 			Options:  scopeList,
 			PageSize: 10,
+			Default:  scope,
 		}
 		survey.AskOne(promptScope, &scope)
 	}
+
 	if scope == "root" {
 		scope = ""
 	}
 
-	// 4. タグ選択（標準 + カスタム）
+	// 4. タグ選択
 	tag := prompt.SelectCommitType(cfg.CustomTags)
 
-	// 5. コミットメッセージ入力
+	// 5. メッセージ入力
 	message := prompt.InputCommitMessage()
 
 	// 6. コミットメッセージ生成
