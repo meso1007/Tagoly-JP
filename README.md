@@ -92,7 +92,9 @@ tagoly
 ```
 
 ## リポジトリ
-https://github.com/meso1007/tagoly-jp
 
+- Tagoly-JP 本体: [https://github.com/meso1007/tagoly-jp](https://github.com/meso1007/tagoly-jp)  
+- Homebrew Tap: [https://github.com/meso1007/homebrew-tagoly-jp](https://github.com/meso1007/homebrew-tagoly-jp)  
+- Scoop バケット: [https://github.com/meso1007/scoop-tagoly-jp](https://github.com/meso1007/scoop-tagoly-jp)
 
 ---
